@@ -1,5 +1,7 @@
 //#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
+#include "secrets.h"
+#include <WiFiClientSecure.h>
+#include <MQTTClient.h>
 #include <AccelStepper.h>
 #include <WiFi.h>
 
