@@ -39,7 +39,10 @@ bool CurtHyster1 = false;
 int32_t steps_from_zero1 = 0;
 bool CurtHyster2 = false;
 int32_t steps_from_zero2 = 0;
-char m_msg_buffer[MSG_BUFFER_SIZE]; 
+char m_msg_buffer[MSG_BUFFER_SIZE];
+
+//int LED_BUILTIN = 2;
+
 // Define a stepper and the pins it will use
 AccelStepper stepper1(AccelStepper::HALF4WIRE, 32, 25, 33, 26); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
 AccelStepper stepper2(AccelStepper::HALF4WIRE, 23, 21, 22, 19);
@@ -101,13 +104,13 @@ void messageHandler(String &topic, String &payload)
   got_float = atof(cstr);
   if (strcmp(topic.c_str(), MQTT_STEP1) == 0)
   {
-    got_int1 = (int)got_float*100;
+    got_int1 = (int)got_float * 100;
     stepper1.moveTo(got_int1);
     stepper1.run();
   }
   else
   {
-    got_int2 = (int)got_float*100;
+    got_int2 = (int)got_float * 100;
     stepper2.moveTo(got_int2);
     stepper2.run();
   }
