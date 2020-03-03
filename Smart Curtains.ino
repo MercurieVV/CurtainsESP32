@@ -45,41 +45,61 @@ AccelStepper stepper1(AccelStepper::HALF4WIRE, 32, 25, 33, 26); // Defaults to A
 AccelStepper stepper2(AccelStepper::HALF4WIRE, 23, 21, 22, 19);
 
 // Update these with values suitable for your network.
-const char *ssid = "Your SSID";
-const char *password = "Your Password";
-const char *mqtt_server = "Your mqtt server";
-//const char* mqtt_server = "iot.eclipse.org";
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClientSecure net = WiFiClientSecure();
+MQTTClient client = MQTTClient(256);
 
 const char *p_payload;
 float got_float;
 int i;
 
-void setup_wifi()
+void connectAWS()
 {
-  delay(100);
-  // We start by connecting to a WiFi network
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  Serial.println("Connecting to Wi-Fi");
+
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+    Serial.print(".");
   }
-  randomSeed(micros());
+
+  // Configure WiFiClientSecure to use the AWS IoT device credentials
+  net.setCACert(AWS_CERT_CA);
+  net.setCertificate(AWS_CERT_CRT);
+  net.setPrivateKey(AWS_CERT_PRIVATE);
+
+  // Connect to the MQTT broker on the AWS endpoint we defined earlier
+  client.begin(AWS_IOT_ENDPOINT, 8883, net);
+
+  // Create a message handler
+  client.onMessage(messageHandler);
+
+  Serial.print("Connecting to AWS IOT");
+
+  while (!client.connect(THINGNAME)) {
+    Serial.print(".");
+    delay(100);
+  }
+
+  if (!client.connected()) {
+    Serial.println("AWS IoT Timeout!");
+    return;
+  }
+
+  // Subscribe to a topic
+  client.subscribe(MQTT_STEP1);
+  client.subscribe(MQTT_STEP2);
+
+  Serial.println("AWS IoT Connected!");
 }
 
-void callback(char *topic, byte *payload, unsigned int length)
+void messageHandler(String &topic, String &payload)
 {
-  
-  for (i = 0; i < length; i++)
-  {
-    m_msg_buffer[i] = payload[i];
-  }
-  m_msg_buffer[i] = '\0';
-  p_payload = m_msg_buffer;
-  got_float = atof(p_payload);
-  //if (memcmp(topic, Topic1, 6))
-  if (strcmp(topic, MQTT_STEP1) == 0)
+  Serial.println(topic);
+  const char *cstr = payload.c_str();
+  got_float = atof(cstr);
+  if (strcmp(topic.c_str(), MQTT_STEP1) == 0)
   {
     got_int1 = (int)got_float*100;
     stepper1.moveTo(got_int1);
@@ -127,9 +147,7 @@ void setup()
   pinMode(switch_2_pin, INPUT_PULLUP);
   pinMode(switch_3_pin, INPUT_PULLUP);
   pinMode(switch_4_pin, INPUT_PULLUP);
-  setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  connectAWS();
   // set the speed at 600 rpm:
   stepper1.setMaxSpeed(600);
   stepper1.setAcceleration(300);
