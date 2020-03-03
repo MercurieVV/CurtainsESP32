@@ -143,6 +143,12 @@ void reconnect()
 
 void setup()
 {
+  Serial.begin(115200);
+  gpio_pad_select_gpio(LED_BUILTIN);
+    /* Set the GPIO as a push/pull output */
+  pinMode(LED_BUILTIN, GPIO_MODE_OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  
   pinMode(switch_1_pin, INPUT_PULLUP);
   pinMode(switch_2_pin, INPUT_PULLUP);
   pinMode(switch_3_pin, INPUT_PULLUP);
@@ -154,6 +160,7 @@ void setup()
   stepper2.setMaxSpeed(600);
   stepper2.setAcceleration(300);
 }
+
 //to do rebase for 1 function
 void checkStep1 (void)
 {
