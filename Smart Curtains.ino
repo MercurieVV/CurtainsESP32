@@ -7,17 +7,14 @@
 
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 
-String clientId = "ESP32-Shabarova"; //Шабарова, Зоя Алексеевна
-#define MQTT_ID "/ESP32-Shabarova/"
-#define MQTT_STEP2 "/ESP32-Shabarova/Borisov/" //Борисов Юрий Алексеевич
-#define MQTT_STEP1 "/ESP32-Shabarova/Obuhov/"  //Обухов Дмитрий Константинович
-#define PUB_STEPS2 "/ESP32-Shabarova/Borisov_step/"
-#define PUB_STEPS1 "/ESP32-Shabarova/Obuhov_step/"
+#define MQTT_STEP2 "Courtains1/sub/step2"
+#define MQTT_STEP1 "Courtains1/sub/step1"
+#define PUB_STEPS2 "Courtains1/pub/step2"
+#define PUB_STEPS1 "Courtains1/pub/step1"
 #define CURTMAXIMUM 550
 #define STOPHYSTERESIS 5
 #define MSG_BUFFER_SIZE 20
 
-const char *Topic1 = MQTT_STEP1;
 //to do add array of pins and steppers
 int switch_1_pin = 17;
 int switch_2_pin = 16;
@@ -36,7 +33,7 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 //int LED_BUILTIN = 2;
 
 // Define a stepper and the pins it will use
-AccelStepper stepper1(AccelStepper::HALF4WIRE, 32, 25, 33, 26); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
+AccelStepper stepper1(AccelStepper::HALF4WIRE, 33, 26, 25, 27); // Defaults to AccelStepper::FULL4WIRE (4 pins) on 2, 3, 4, 5
 AccelStepper stepper2(AccelStepper::HALF4WIRE, 23, 21, 22, 19);
 
 // Update these with values suitable for your network.
@@ -121,7 +118,7 @@ void reconnect()
     // Attempt to connect
     //if you MQTT broker has clientID,username and password
     //please change following line to    if (client.connect(clientId,userName,passWord))
-    if (client.connect(clientId.c_str()))
+    if (client.connect(THINGNAME))
     {
 
       //once connected to MQTT broker, subscribe command if any
@@ -135,7 +132,6 @@ void reconnect()
     }
   }
 } //end reconnect()
-
 void setup()
 {
   Serial.begin(115200);
@@ -256,6 +252,3 @@ void loop()
   checkStep2();
   client.loop();
 }
-
-
-
